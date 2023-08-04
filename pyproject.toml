@@ -1,0 +1,182 @@
+# region: Poetry
+
+[tool.poetry]
+name = "hyprland-autocompile"
+version = "0.0.0" # Managed by poetry-dynamic-versioning
+description = "Script for easy compilation of hyprland"
+authors = ["ItsDrike <itsdrike@protonmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+repository = "https://github.com/ItsDrike/hyprland-autocompile"
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Natural Language :: English",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Desktop Environment :: Window Managers",
+  "Typing :: Typed",
+]
+packages = [{ include = "hyprland_autocompile" }]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4"
+
+[tool.poetry.group.release.dependencies]
+poetry-dynamic-versioning = "^0.25.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
+
+[tool.poetry.group.lint.dependencies]
+ruff = "^0.0.282"
+black = "^23.7.0"
+isort = "^5.12.0"
+pyright = "^1.1.320"
+
+# endregion
+# region: Linters
+
+[tool.pyright]
+pythonVersion = "3.9"
+
+reportUntypedFunctionDecorator = "error"
+reportUntypedClassDecorator = "error"
+reportUntypedNamedTuple = "error"
+reportTypeCommentUsage = "error"
+reportConstantRedefinition = "error"
+reportDeprecated = "warning"
+reportIncompatibleMethodOverride = "error"
+reportUnknownParameterType = "error"
+reportUnknownVariableType = "error"
+reportOverlappingOverload = "error"
+reportUnnecessaryIsInstance = "error"
+reportUnnecessaryCast = "error"
+reportUnnecessaryComparison = "error"
+reportUnnecessaryContains = "error"
+reportUnnecessaryTypeIgnoreComment = "error"
+reportShadowedImports = "error"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 119
+
+select = [
+  "F",     # pyflakes
+  "W",     # pycodestyle (warnigns)
+  "E",     # pycodestyle (errors)
+  "N",     # pep8-naming
+  "UP",    # pyupgrade
+  "D",     # pydocstyle
+  "YTT",   # flake8-2020
+  "ANN",   # flake8-annotations
+  "ASYNC", # flake8-async
+  "S",     # flake8-bandit
+  "B",     # flake8-bugbear
+  "A",     # flake8-builtins
+  "C4",    # flake8-comprehensions
+  "DTZ",   # flake8-datetimez
+  "T10",   # flake8-debugger
+  "FA",    # flake8-future-annotations
+  "ISC",   # flake8-implicit-str-concat
+  "G",     # flake8-logging-format
+  "INP",   # flake8-no-pep420
+  "PIE",   # flake8-pie
+  "T20",   # flake8-print
+  "PYI",   # flake8-pyi
+  "PT",    # flake8-pytest-style
+  "Q",     # flake8-quotes
+  "RSE",   # flake8-raise
+  "RET",   # flake8-return
+  "SIM",   # flake8-simplify
+  "TID",   # flake8-tidy-imports
+  "INT",   # flake8-gettext
+  "ARG",   # flake8-unused-arguments
+  "PTH",   # flake8-use-pathlib
+  "PGH",   # pygrep-hooks
+  "PL",    # pylint
+  "TRY",   # tryceratops
+  "FLY",   # flynt
+  "PERF",  # perflint
+  "RUF",   # ruff-specific rules
+]
+
+ignore = [
+  "D100", # Missing docstring in public module
+  "D104", # Missing docstring in public package
+  "D105", # Missing docstring in magic method
+  "D107", # Missing docstring in __init__
+  "D203", # Blank line required before class docstring
+  "D301", # Use r""" if any backslashes in a docstring
+  "D405", # Section name should be properly capitalized
+  "D406", # Section name should end with a newline
+  "D407", # Missing dashed underline after section
+  "D408", # Section underline should be in the line following the section's name
+  "D409", # Section underline should match the length of its name
+  "D410", # Missing blank line after section
+  "D411", # Missing blank line before section
+  "D412", # No blank lines allowed between a section header and its content
+  "D413", # Missing blank line after last section
+  "D414", # Section has no content
+  "D416", # Section name should end with a colon
+  "D417", # Missing argument descrition in the docstring
+
+  "ANN101", # Missing type annotation for self in method
+  "ANN102", # Missing type annotation for cls in classmethod
+  "ANN204", # Missing return type annotation for special method
+
+  "G001", # Logging statement uses str.format
+  "G002", # Logging statement uses %
+  "G003", # Logging statement uses +
+  "G004", # Logging statement uses f-string
+
+  "RET504",  # Unnecessary assignment to variable before return statement
+  "PLR2004", # Using unnamed numerical constants
+  "PGH003",  # Using specific rule codes in type ignores
+  "TRY003",  # Specifying long exc messages in arguments instead of in class
+  "TRY300",  # Consider moving this statement to an else block
+]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.pylint]
+max-args = 5
+max-branches = 12
+max-returns = 6
+max-statements = 50
+
+[tool.black]
+line-length = 119
+
+[tool.isort]
+profile = "black"
+line_length = 119
+atomic = true
+order_by_type = false
+case_sensitive = true
+combine_as_imports = true
+
+# endregion
+# region: Building
+
+[tool.poetry-dynamic-versioning]
+enable = true
+bump = true
+vcs = "git"
+style = "pep440"
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry.core.masonry.api"
+
+# endregion
