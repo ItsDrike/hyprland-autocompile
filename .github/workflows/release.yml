@@ -5,18 +5,13 @@ on:
     types:
       - published
 
-jobs:
-  pypi-publish:
-    name: Publish release to PyPI
-    runs-on: ubuntu-latest
-    environment: release
-    permissions:
-      # Used to authenticate to PyPI via OIDC.
-      # Used to sign the release's artifacts with sigstore-python.
-      id-token: write
+permissions:
+  contents: read
 
-      # Used to attach signing artifacts to the published release.
-      contents: write
+jobs:
+  build:
+    name: Build the project
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -34,12 +29,74 @@ jobs:
       - name: Build project for distribution
         run: poetry build
 
-      # This uses PyPI's trusted publishing, so no token is required
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Upload dists
+        uses: actions/upload-artifact@3.1.2
+        with:
+          name: "dist"
+          path: "dist/"
+          if-no-files-found: error
+          retention-days: 5
 
-      - name: Sign distribution files with SignStore and upload back to PyPI
+  sigstore-sign:
+    # We use sigstore to sign the built distribution files, to allow
+    # users to confirm that they can be trusted, and weren't compromised.
+    #
+    # To do this, we use GitHub OIDC, which Sigstore requests, providing it
+    # with information about this workflow run. It is this information that
+    # is the "source of trust" for this signature. This can be relied on, since
+    # this action can only be triggered by project maintainers, and it's the
+    # only way to get the OIDC data that will be signed. No one else can
+    # reproduce it.
+    #
+    # From here, the sigstore action will then upload the signatures as
+    # artifacts to the GitHub release that triggered this action. It will also
+    # upload the distribution files themselves (that were signed). Also, it will
+    # even pull the default artifacts (already in the release, added by GitHub)
+    # containing the (tar) archived source code for that version, and generate
+    # signatures for that too.
+    name: Sign the project distribution files
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      # Used by sigstore for OIDC information on this workflow.
+      id-token: write
+      # Used by sigstore to upload the signatures as artifacts to the GitHub
+      # reelase that triggered this workflow run.
+      contents: write
+
+    steps:
+      - name: Download the built distribution files from PR artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: "dist"
+          path: "dist/"
+
+      - name: Sign the distribution files and upload signatures to release
         uses: sigstore/gh-action-sigstore-python@v1.2.3
         with:
-          inputs: ./dist/*.tar.gz ./dist/*.whl
+          inputs: dist/*
           release-signing-artifacts: true
+
+  pypi-publish:
+    name: Publish release to PyPI
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      # Used to authenticate to PyPI via OIDC.
+      id-token: write
+
+    steps:
+      - name: Download the built distribution files from PR artifact
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: "dist"
+          path: "dist/"
+
+      # Upload to Test PyPI first, in case something fails.
+      - name: Upload to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy
+
+      - name: Upload to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
